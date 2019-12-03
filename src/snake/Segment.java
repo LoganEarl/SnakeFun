@@ -1,6 +1,8 @@
 package snake;
 
 import processing.core.PApplet;
+import utils.MutableDouble;
+import utils.Point;
 import utils.Utils;
 
 import java.awt.*;
@@ -8,31 +10,46 @@ import java.awt.*;
 public class Segment {
     private Point position;
     //this is intentionally a reference to the Snake body size. No updates needed
-    private Double radius;
+    private MutableDouble radius;
+    private double direction; //in radians
 
-    public Segment(Point position, Double radius) {
-        this.position = position;
+    public Segment(Point position, MutableDouble radius, double direction) {
+        this.position = new Point(position);
         this.radius = radius;
+        this.direction = direction;
     }
 
-    public Segment(double x, double y, Double radius) {
+    public Segment(double x, double y, MutableDouble radius, double direction) {
         this.position = new Point(x, y);
         this.radius = radius;
+        this.direction = direction;
     }
 
     public Point getPosition() {
         return position;
     }
 
-    public Double getRadius() {
-        return radius;
+    public void setPosition(Point position) {
+        this.position = position;
+    }
+
+    public double getRadius() {
+        return radius.get();
+    }
+
+    public double getDirection() {
+        return direction;
+    }
+
+    public void setDirection(double direction) {
+        this.direction = direction;
     }
 
     public void drawTo(PApplet applet, Point ll, Point ur, Point scale, Point bias, Color rgb){
-        double upperX =  position.getX() + radius;
-        double lowerX = position.getX() - radius;
-        double upperY = position.getY() + radius;
-        double lowerY = position.getY() - radius;
+        double upperX =  position.getX() + radius.get();
+        double lowerX = position.getX() - radius.get();
+        double upperY = position.getY() + radius.get();
+        double lowerY = position.getY() - radius.get();
 
         //if we are visible on the screen
         if(Utils.linearContains(upperX, lowerX, ur.getX(), ll.getX()) &&
@@ -42,8 +59,8 @@ public class Segment {
             applet.ellipse(
                     (float)(relativePosition.getX() * scale.getX() + bias.getX()),
                     (float)(relativePosition.getY() * scale.getY() + bias.getY()),
-                    (float)(radius * scale.getX()),
-                    (float)(radius * scale.getY()));
+                    (float)(radius.get() * 2 * scale.getX()),
+                    (float)(radius.get() * 2 * scale.getY()));
         }
     }
 }
