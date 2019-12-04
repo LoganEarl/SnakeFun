@@ -19,8 +19,8 @@ public class SimpleSnakeBody implements SnakeBody {
     private static final double BASE_FOOD_USAGE = 0.0001;
     private static final double BOOST_FOOD_COEFFICIENT = 0.001;
     private static final double MIN_SPEED = 0.1;
-    private static final double MAX_SPEED = 0.5;
-    private static final double BOOST_SPEED = 0.8;
+    private static final double MAX_SPEED = 0.2;
+    private static final double BOOST_SPEED = 0.3;
     private static final double SPEED_COEFFICIENT = 0.0001;
     private static final double BODY_LENGTH_COEFFICIENT = 2.5;
     private static final double BODY_RADIUS_COEFFICIENT = 0.03;
@@ -93,6 +93,21 @@ public class SimpleSnakeBody implements SnakeBody {
     }
 
     @Override
+    public Color getColor() {
+        return color;
+    }
+
+    @Override
+    public double getFood() {
+        return foodCount;
+    }
+
+    @Override
+    public void addFood(double food) {
+        foodCount += food;
+    }
+
+    @Override
     public void simulationTick() {
         if(boosting)
             foodCount -= BASE_FOOD_USAGE + BOOST_FOOD_COEFFICIENT * calculateTargetSegments(foodCount);
@@ -114,11 +129,5 @@ public class SimpleSnakeBody implements SnakeBody {
             }
             lastPos = curPos;
         }
-    }
-
-    @Override
-    public void drawTo(PApplet applet, Point ll, Point ur, Point scale, Point bias) {
-        for(int i = bodySegments.size()-1; i >= 0; i--)
-            bodySegments.get(i).drawTo(applet, ll, ur, scale, bias, color);
     }
 }

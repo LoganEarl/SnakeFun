@@ -44,23 +44,4 @@ public class Segment {
     public void setDirection(double direction) {
         this.direction = direction;
     }
-
-    public void drawTo(PApplet applet, Point ll, Point ur, Point scale, Point bias, Color rgb){
-        double upperX =  position.getX() + radius.get();
-        double lowerX = position.getX() - radius.get();
-        double upperY = position.getY() + radius.get();
-        double lowerY = position.getY() - radius.get();
-
-        //if we are visible on the screen
-        if(Utils.linearContains(upperX, lowerX, ur.getX(), ll.getX()) &&
-            Utils.linearContains(upperY, lowerY, ur.getY(), ll.getY())){
-            Point relativePosition = position.sub(ll);
-            applet.fill(rgb.getRed(),rgb.getGreen(), rgb.getBlue());
-            applet.ellipse(
-                    (float)(relativePosition.getX() * scale.getX() + bias.getX()),
-                    (float)(relativePosition.getY() * scale.getY() + bias.getY()),
-                    (float)(radius.get() * 2 * scale.getX()),
-                    (float)(radius.get() * 2 * scale.getY()));
-        }
-    }
 }

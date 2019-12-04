@@ -3,6 +3,7 @@ package snake;
 import processing.core.PApplet;
 import utils.Point;
 
+import java.awt.*;
 import java.util.List;
 
 public interface SnakeBody {
@@ -10,7 +11,9 @@ public interface SnakeBody {
     Segment getHead();
     double getSpeed();
     double getHeadDirection();
+    Color getColor();
+    double getFood();
+    void addFood(double food);
     void setHeadDirection(double direction);
     void simulationTick();
-    void drawTo(PApplet applet, Point ll, Point ur, Point scale, Point bias);
 }
