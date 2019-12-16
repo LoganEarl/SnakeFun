@@ -1,5 +1,7 @@
 package utils;
 
+import java.util.Objects;
+
 public class Point {
     private double x;
     private double y;
@@ -67,5 +69,26 @@ public class Point {
 
     public double distanceTo(Point destination){
         return Math.sqrt(Math.pow(destination.y - y,2) + Math.pow(destination.x - x, 2));
+    }
+
+    public boolean containedBy(Point ur, Point ll){
+        return x <= ur.getX() &&
+                x >= ll.getX() &&
+                y <= ur.getY() &&
+                y >= ll.getY();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Point point = (Point) o;
+        return Double.compare(point.x, x) == 0 &&
+                Double.compare(point.y, y) == 0;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(x, y);
     }
 }

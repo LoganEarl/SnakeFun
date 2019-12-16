@@ -9,6 +9,26 @@ import java.awt.*;
 import java.util.List;
 
 public class View {
+    public static void drawFood(Food food,  PApplet applet, Point ll, Point ur, Point scale, Point bias, Color rgb){
+        Point position = food.getPosition();
+        double radius = food.getAmount();
+        double upperX =  position.getX() + radius;
+        double lowerX = position.getX() - radius;
+        double upperY = position.getY() + radius;
+        double lowerY = position.getY() - radius;
+
+        if(Utils.linearContains(upperX, lowerX, ur.getX(), ll.getX()) &&
+                Utils.linearContains(upperY, lowerY, ur.getY(), ll.getY())){
+            Point relativePosition = position.sub(ll);
+            applet.fill(rgb.getRed(),rgb.getGreen(), rgb.getBlue());
+            applet.ellipse(
+                    (float)(relativePosition.getX() * scale.getX() + bias.getX()),
+                    (float)(relativePosition.getY() * scale.getY() + bias.getY()),
+                    (float)(radius * 2 * scale.getX()),
+                    (float)(radius * 2 * scale.getY()));
+        }
+    }
+
     private static void drawSegment(Segment segment, PApplet applet, Point ll, Point ur, Point scale, Point bias, Color rgb){
         Point position = segment.getPosition();
         double radius = segment.getRadius();

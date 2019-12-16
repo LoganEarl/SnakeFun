@@ -16,4 +16,8 @@ public interface SnakeBody {
     void addFood(double food);
     void setHeadDirection(double direction);
     void simulationTick();
+    boolean headCollidingWith(Point point, double radius);
+    boolean bodyCollidingWith(Point point, double radius);
+    void kill();
+    boolean isDead();
 }

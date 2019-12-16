@@ -3,14 +3,15 @@ package snake;
 import processing.core.PApplet;
 import processing.event.MouseEvent;
 import utils.Point;
-import utils.Utils;
 
 import java.awt.*;
+import java.util.List;
 import java.util.Set;
 
 public class WorldWindow extends PApplet {
     private static final int SCREEN_WIDTH = 1000;
     private static final int SCREEN_HEIGHT = 500;
+    private static final double TURN_RATE = 3.0 / 180.0 * Math.PI;
 
     private Point focusPoint = new Point(15, 10);
     private float focusHeight = 20;
@@ -19,13 +20,19 @@ public class WorldWindow extends PApplet {
     private double direction = 0;
     private WorldModel model;
 
+
     public void settings() {
         size(SCREEN_WIDTH, SCREEN_HEIGHT);
     }
 
     public void setup() {
         frameRate(60);
-        model = new WorldModel(20, new Point(100,100), true);
+        model = new WorldModel(
+                20,
+                new Point(100, 100),
+                true,
+                5,
+                0.1, 0.15);
     }
 
     public void draw() {
@@ -39,28 +46,59 @@ public class WorldWindow extends PApplet {
         Point ll = focusPoint.sub(new Point(focusWidth, focusHeight));
         Point ur = focusPoint.add(new Point(focusWidth, focusHeight));
 
-        Point worldMouse = new Point(mouseX,mouseY);
+        Point worldMouse = new Point(mouseX, mouseY);
         worldMouse = worldMouse.sub(bias);
         worldMouse = worldMouse.div(scale);
         worldMouse = worldMouse.add(ll);
 
         View.drawGrid(this, ll, ur, scale, bias);
 
-        Set<SnakeBody> npcs = model.getNPCSnakes();
+        SnakeBody player = model.getPlayer();
+
+        Set<SnakeBody> npcs = model.getLivingSnakes();
         direction += 0.1;
-        for(SnakeBody s: npcs) {
-            s.setHeadDirection(direction);
-            s.simulationTick();
-            View.drawSnake(s,this, ll, ur, scale, bias);
+        for (SnakeBody s : npcs) {
+            if(!s.equals(player)) //TODO make an npc ai
+                s.setHeadDirection(direction);
         }
 
-        model.getPlayer().addFood(0.01);
-        model.getPlayer().setHeadDirection(focusPoint.angleTo(worldMouse));
-        model.getPlayer().simulationTick();
-        View.drawSnake(model.getPlayer(),this, ll, ur, scale, bias);
+        List<Food> food =  model.getFoodWithin(ll, ur);
+        for(Food f:food){
+            View.drawFood(f,this, ll, ur, scale, bias, Color.PINK);
+        }
+
+        double curDirection = player.getHeadDirection();
+        double targetDirection = focusPoint.angleTo(worldMouse);
+
+        player.setHeadDirection(turnPlayer(curDirection, targetDirection, TURN_RATE));
+
+        model.tick();
+
+        for(SnakeBody s: model.getLivingSnakes()){
+            View.drawSnake(s, this, ll, ur, scale, bias);
+        }
+
+        model.doSnakeCollisions();
+        model.doFoodCollisions();
     }
 
-    private void drawStage(Point ur, Point ll){
+    @SuppressWarnings("SameParameterValue") //might change it later
+    private static double turnPlayer(double curDirection, double targetDirection, double turnRate) {
+        double delta1 = (targetDirection - curDirection) % (Math.PI * 2);
+        double delta2;
+        if(delta1 < 0)
+            delta2 = Math.PI * 2 + delta1;
+        else
+            delta2 = Math.PI * 2 - delta1;
+
+        double selectedDelta;
+        selectedDelta = Math.abs(delta1) < Math.abs(delta2) ? delta1 : delta2;
+        int sign = selectedDelta >= 0 ? 1 : -1;
+
+        return curDirection + (Math.abs(selectedDelta) > turnRate ? turnRate * sign : selectedDelta);
+    }
+
+    private void drawStage(Point ur, Point ll) {
         Point[] boundaries = {new Point()};
     }
 
@@ -72,7 +110,6 @@ public class WorldWindow extends PApplet {
             focusHeight += e;
             focusWidth += e;
         }
-
     }
 
     public static void main(String[] passedArgs) {
