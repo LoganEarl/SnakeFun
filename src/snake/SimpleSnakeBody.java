@@ -5,6 +5,7 @@ import utils.Point;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class SimpleSnakeBody implements SnakeBody {
@@ -17,9 +18,7 @@ public class SimpleSnakeBody implements SnakeBody {
     private boolean boosting = false;
     private double foodCount;
 
-    private static final double BASE_FOOD_USAGE = 0.0001;
-    private static final double BOOST_FOOD_COEFFICIENT = 0.001;
-    private static final double MIN_SPEED = 0.1;
+    private static final double MIN_SPEED = 0.15;
     private static final double MAX_SPEED = 0.2;
     private static final double BOOST_SPEED = 0.3;
     private static final double SPEED_COEFFICIENT = 0.0001;
@@ -91,11 +90,6 @@ public class SimpleSnakeBody implements SnakeBody {
     @Override
     public void simulationTick() {
         if(!dead) {
-            if (boosting)
-                foodCount -= BASE_FOOD_USAGE + BOOST_FOOD_COEFFICIENT * calculateTargetSegments(foodCount);
-            else
-                foodCount -= BASE_FOOD_USAGE;
-
             calculateBody();
 
             assert bodySegments.size() > 0;
@@ -159,5 +153,23 @@ public class SimpleSnakeBody implements SnakeBody {
     @Override
     public boolean isDead() {
         return dead;
+    }
+
+    @Override
+    public double[] getBodyFoodDistribution() {
+        double amount = foodCount / bodySegments.size();
+        double[] distribution = new double[bodySegments.size()];
+        Arrays.fill(distribution, amount);
+        return distribution;
+    }
+
+    @Override
+    public boolean isBoosting() {
+        return boosting;
+    }
+
+    @Override
+    public void setBoosting(boolean boosting) {
+        this.boosting = boosting;
     }
 }

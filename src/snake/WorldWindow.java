@@ -112,6 +112,16 @@ public class WorldWindow extends PApplet {
         }
     }
 
+    @Override
+    public void mousePressed() {
+        model.getPlayer().setBoosting(true);
+    }
+
+    @Override
+    public void mouseReleased() {
+        model.getPlayer().setBoosting(false);
+    }
+
     public static void main(String[] passedArgs) {
         String[] appletArgs = new String[]{WorldWindow.class.getName()};
         PApplet.main(appletArgs);

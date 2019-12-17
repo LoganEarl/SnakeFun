@@ -20,4 +20,8 @@ public interface SnakeBody {
     boolean bodyCollidingWith(Point point, double radius);
     void kill();
     boolean isDead();
+    //basically, distribute food along each body segment. Used if the snake dies
+    double[] getBodyFoodDistribution();
+    boolean isBoosting();
+    void setBoosting(boolean boosting);
 }

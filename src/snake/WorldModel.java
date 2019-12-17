@@ -10,15 +10,24 @@ public class WorldModel {
     private Set<SnakeBody> livingSnakes = new HashSet<>();
     private Set<SnakeBody> deadSnakes = new HashSet<>();
     private Set<SnakeBody> playerSnakes = new HashSet<>();
+    private Map<SnakeBody, Integer> lastBoostTimings = new HashMap<>();
     private Point size;
     private Random random = new Random(System.currentTimeMillis());
     private static final int FOOD_MAP_RESOLUTION = 16;
+    private final double BOOST_FOOD_USAGE;
     private Map<Point, List<Food>> foodPlacing = new HashMap<>();
+
+    private int tickNum = 0;
+
+    //TODO create a global food bucket that makes food a closed system without inflation
+    double foodBucket = 0;
 
     private double minFood, maxFood;
 
+    //TODO make a factory for this class
     //foodDensity represents how many food parts should exist on average per 10x10 square
     public WorldModel(int numSnakes, Point size, boolean hasPlayer, double foodDensity, double minFood, double maxFood) {
+        BOOST_FOOD_USAGE = 0.001;
         this.minFood = minFood;
         this.maxFood = maxFood;
         this.size = size;
@@ -41,8 +50,23 @@ public class WorldModel {
 
     public void tick() {
         for (SnakeBody s : livingSnakes) {
+            if(s.isBoosting()) {
+                if(!lastBoostTimings.containsKey(s))
+                    lastBoostTimings.put(s,tickNum);
+                if(lastBoostTimings.get(s) + 30 < tickNum) {
+                    double foodUsage = (tickNum - lastBoostTimings.get(s)) * BOOST_FOOD_USAGE;
+
+                    s.addFood(-1 * foodUsage);
+                    Point lastSeg = s.getSegments().get(s.getSegments().size() - 1).getPosition();
+                    addFood(lastSeg, foodUsage);
+                    lastBoostTimings.put(s,tickNum);
+                }
+            }else
+                lastBoostTimings.remove(s);
+
             s.simulationTick();
         }
+        tickNum++;
     }
 
     private void placeInitialFood(double density) {
@@ -106,7 +130,16 @@ public class WorldModel {
     }
 
     private void decompose(SnakeBody deadSnake){
+        double[] distribution = deadSnake.getBodyFoodDistribution();
+        if(distribution.length != deadSnake.getSegments().size())
+            throw new IllegalArgumentException("Food distribution size does not match snake size");
 
+        List<Segment> bodySegments = deadSnake.getSegments();
+        for(int i = 0; i < distribution.length; i++){
+            double bucketPortion = distribution[i] * 0.75;
+            foodBucket += bucketPortion;
+            addFood(bodySegments.get(i).getPosition(), distribution[i] - bucketPortion);
+        }
     }
 
     public void addFood() {
@@ -115,6 +148,8 @@ public class WorldModel {
     }
 
     public void addFood(Point position, double amount) {
+        if(amount <= 0)
+            throw new IllegalArgumentException("Must be more than 0 food");
         Food f = new Food(amount, position);
         Point foodCords = toFoodMapCords(position);
         if (!foodPlacing.containsKey(foodCords))

@@ -11,7 +11,7 @@ import java.util.List;
 public class View {
     public static void drawFood(Food food,  PApplet applet, Point ll, Point ur, Point scale, Point bias, Color rgb){
         Point position = food.getPosition();
-        double radius = food.getAmount();
+        double radius = food.getAmount() * 4;
         double upperX =  position.getX() + radius;
         double lowerX = position.getX() - radius;
         double upperY = position.getY() + radius;
@@ -52,6 +52,11 @@ public class View {
 
     public static void drawSnake(SnakeBody snake, PApplet applet, Point ll, Point ur, Point scale, Point bias) {
         List<Segment> bodySegments = snake.getSegments();
+        if(snake.isBoosting())
+            applet.stroke(Color.YELLOW.getRed(),Color.YELLOW.getGreen(),Color.YELLOW.getBlue());
+        else
+            applet.stroke(0);
+
         for(int i = snake.getSegments().size()-1; i >= 0; i--)
             drawSegment(bodySegments.get(i), applet, ll, ur, scale, bias, snake.getColor());
     }
