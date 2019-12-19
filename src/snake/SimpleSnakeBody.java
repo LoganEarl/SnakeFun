@@ -22,8 +22,9 @@ public class SimpleSnakeBody implements SnakeBody {
     private static final double MAX_SPEED = 0.2;
     private static final double BOOST_SPEED = 0.3;
     private static final double SPEED_COEFFICIENT = 0.0001;
-    private static final double BODY_LENGTH_COEFFICIENT = 2.5;
-    private static final double BODY_RADIUS_COEFFICIENT = 0.03;
+    private static final double BODY_LENGTH_COEFFICIENT = 0.5;
+    private static final double BODY_RADIUS_COEFFICIENT = 0.05;
+    private static final double BODY_SPACING_COEFFICIENT = .4;
     private List<Segment> bodySegments;
 
     private Color color;
@@ -99,9 +100,9 @@ public class SimpleSnakeBody implements SnakeBody {
             for (int i = 1; i < bodySegments.size(); i++) {
                 Point curPos = bodySegments.get(i).getPosition();
                 double distance = curPos.distanceTo(lastPos);
-                if (distance > segmentRadius.get()) {
+                if (distance > segmentRadius.get() * BODY_SPACING_COEFFICIENT) {
                     double angle = curPos.angleTo(lastPos);
-                    curPos.set(curPos.go(angle, distance - segmentRadius.get()));
+                    curPos.set(curPos.go(angle, distance - segmentRadius.get() * BODY_SPACING_COEFFICIENT));
                 }
                 lastPos = curPos;
             }

@@ -15,7 +15,7 @@ public class WorldModel {
     private Random random = new Random(System.currentTimeMillis());
     private static final int FOOD_MAP_RESOLUTION = 16;
     private final double BOOST_FOOD_USAGE;
-    private Map<Point, List<Food>> foodPlacing = new HashMap<>();
+    private Map<Point, Set<Food>> foodPlacing = new HashMap<>();
 
     private int tickNum = 0;
 
@@ -53,12 +53,11 @@ public class WorldModel {
             if(s.isBoosting()) {
                 if(!lastBoostTimings.containsKey(s))
                     lastBoostTimings.put(s,tickNum);
-                if(lastBoostTimings.get(s) + 30 < tickNum) {
-                    double foodUsage = (tickNum - lastBoostTimings.get(s)) * BOOST_FOOD_USAGE;
-
+                double foodUsage = (tickNum - lastBoostTimings.get(s)) * BOOST_FOOD_USAGE;
+                if(foodUsage > minFood) {
                     s.addFood(-1 * foodUsage);
                     Point lastSeg = s.getSegments().get(s.getSegments().size() - 1).getPosition();
-                    addFood(lastSeg, foodUsage);
+                    addFood(new Point(lastSeg), foodUsage);
                     lastBoostTimings.put(s,tickNum);
                 }
             }else
@@ -153,7 +152,7 @@ public class WorldModel {
         Food f = new Food(amount, position);
         Point foodCords = toFoodMapCords(position);
         if (!foodPlacing.containsKey(foodCords))
-            foodPlacing.put(foodCords, new ArrayList<>(2));
+            foodPlacing.put(foodCords, new HashSet<>(2));
         foodPlacing.get(foodCords).add(f);
     }
 
@@ -171,7 +170,7 @@ public class WorldModel {
 
         List<Food> food = new LinkedList<>();
 
-        for (List<Food> l : foodPlacing.values())
+        for (Set<Food> l : foodPlacing.values())
             for (Food f : l)
                 if (f.getPosition().distanceTo(p) < radius)
                     food.add(f);

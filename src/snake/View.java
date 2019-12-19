@@ -11,11 +11,13 @@ import java.util.List;
 public class View {
     public static void drawFood(Food food,  PApplet applet, Point ll, Point ur, Point scale, Point bias, Color rgb){
         Point position = food.getPosition();
-        double radius = food.getAmount() * 4;
+        double radius = food.getAmount();
         double upperX =  position.getX() + radius;
         double lowerX = position.getX() - radius;
         double upperY = position.getY() + radius;
         double lowerY = position.getY() - radius;
+
+        applet.noStroke();
 
         if(Utils.linearContains(upperX, lowerX, ur.getX(), ll.getX()) &&
                 Utils.linearContains(upperY, lowerY, ur.getY(), ll.getY())){
@@ -37,6 +39,8 @@ public class View {
         double upperY = position.getY() + radius;
         double lowerY = position.getY() - radius;
 
+        applet.noStroke();
+
         //if we are visible on the screen
         if(Utils.linearContains(upperX, lowerX, ur.getX(), ll.getX()) &&
                 Utils.linearContains(upperY, lowerY, ur.getY(), ll.getY())){
@@ -56,7 +60,6 @@ public class View {
             applet.stroke(Color.YELLOW.getRed(),Color.YELLOW.getGreen(),Color.YELLOW.getBlue());
         else
             applet.stroke(0);
-
         for(int i = snake.getSegments().size()-1; i >= 0; i--)
             drawSegment(bodySegments.get(i), applet, ll, ur, scale, bias, snake.getColor());
     }

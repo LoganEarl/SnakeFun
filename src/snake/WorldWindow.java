@@ -1,6 +1,7 @@
 package snake;
 
 import processing.core.PApplet;
+import processing.core.PFont;
 import processing.event.MouseEvent;
 import utils.Point;
 
@@ -20,22 +21,29 @@ public class WorldWindow extends PApplet {
     private double direction = 0;
     private WorldModel model;
 
+    private PFont font;
 
     public void settings() {
-        size(SCREEN_WIDTH, SCREEN_HEIGHT);
+        size(SCREEN_WIDTH, SCREEN_HEIGHT, P3D);
     }
 
     public void setup() {
         frameRate(60);
         model = new WorldModel(
-                20,
+                10,
                 new Point(100, 100),
                 true,
-                5,
-                0.1, 0.15);
+                2,
+                0.1, 0.3);
+        smooth();
+        font = createFont("Arial Bold",48);
     }
 
     public void draw() {
+        hint(DISABLE_DEPTH_MASK);
+        hint(DISABLE_DEPTH_TEST);
+        //hint(DISABLE_OPTIMIZED_STROKE);
+
         background(64);
 
         float minFocus = Math.min(focusWidth, focusHeight);
@@ -58,13 +66,13 @@ public class WorldWindow extends PApplet {
         Set<SnakeBody> npcs = model.getLivingSnakes();
         direction += 0.1;
         for (SnakeBody s : npcs) {
-            if(!s.equals(player)) //TODO make an npc ai
+            if (!s.equals(player)) //TODO make an npc ai
                 s.setHeadDirection(direction);
         }
 
-        List<Food> food =  model.getFoodWithin(ll, ur);
-        for(Food f:food){
-            View.drawFood(f,this, ll, ur, scale, bias, Color.PINK);
+        List<Food> food = model.getFoodWithin(ll, ur);
+        for (Food f : food) {
+            View.drawFood(f, this, ll, ur, scale, bias, Color.PINK);
         }
 
         double curDirection = player.getHeadDirection();
@@ -74,32 +82,43 @@ public class WorldWindow extends PApplet {
 
         model.tick();
 
-        for(SnakeBody s: model.getLivingSnakes()){
+        for (SnakeBody s : model.getLivingSnakes()) {
             View.drawSnake(s, this, ll, ur, scale, bias);
         }
 
         model.doSnakeCollisions();
         model.doFoodCollisions();
+
+        textFont(font,36);
+        // white float frameRate
+        fill(255);
+        text(frameRate,20,20);
+        // gray int frameRate display:
+        fill(200);
+        text((int)(frameRate),20,60);
     }
 
     @SuppressWarnings("SameParameterValue") //might change it later
     private static double turnPlayer(double curDirection, double targetDirection, double turnRate) {
-        double delta1 = (targetDirection - curDirection) % (Math.PI * 2);
-        double delta2;
-        if(delta1 < 0)
-            delta2 = Math.PI * 2 + delta1;
-        else
-            delta2 = Math.PI * 2 - delta1;
+        double rawDiff = curDirection > targetDirection ? curDirection - targetDirection : targetDirection - curDirection;
+        double modDiff = rawDiff % (Math.PI * 2);
+        double directionChange;
 
-        double selectedDelta;
-        selectedDelta = Math.abs(delta1) < Math.abs(delta2) ? delta1 : delta2;
-        int sign = selectedDelta >= 0 ? 1 : -1;
+        if (modDiff > Math.PI) {
+            directionChange = Math.PI * 2 - modDiff;
+            if (targetDirection > curDirection) directionChange = directionChange * -1;
+        } else {
+            directionChange = modDiff;
+            if (curDirection > targetDirection) directionChange = directionChange * -1;
+        }
 
-        return curDirection + (Math.abs(selectedDelta) > turnRate ? turnRate * sign : selectedDelta);
+        int sign = directionChange >= 0 ? 1 : -1;
+
+        return curDirection + (Math.abs(directionChange) > turnRate ? turnRate * sign : directionChange);
     }
 
-    private void drawStage(Point ur, Point ll) {
-        Point[] boundaries = {new Point()};
+    private static double toDegrees(double d) {
+        return d * 180 / Math.PI;
     }
 
     @Override
