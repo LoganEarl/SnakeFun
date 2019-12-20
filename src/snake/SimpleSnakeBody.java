@@ -5,7 +5,6 @@ import utils.Point;
 
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class SimpleSnakeBody implements SnakeBody {
@@ -26,6 +25,8 @@ public class SimpleSnakeBody implements SnakeBody {
     private static final double BODY_RADIUS_COEFFICIENT = 0.05;
     private static final double BODY_SPACING_COEFFICIENT = .4;
     private List<Segment> bodySegments;
+
+    private static final double TURN_RATE = 3.0 / 180.0 * Math.PI;
 
     private Color color;
 
@@ -69,13 +70,18 @@ public class SimpleSnakeBody implements SnakeBody {
     @Override
     public boolean bodyCollidingWith(Point point, double radius) {
         //no need to check each segment if we are too far away to possibly be colliding
-        if(bodySegments.size() * segmentRadius.get() > radius + point.distanceTo(bodySegments.get(0).getPosition())){
+        if(bodySegments.size() * segmentRadius.get() * BODY_SPACING_COEFFICIENT > radius + point.distanceTo(bodySegments.get(0).getPosition())){
             double size = segmentRadius.get();
             for(Segment segment: bodySegments)
                 if(segment.getPosition().distanceTo(point) <= size + radius)
                     return true;
         }
         return false;
+    }
+
+    @Override
+    public double getSegmentSpacing() {
+        return BODY_SPACING_COEFFICIENT;
     }
 
     @Override
@@ -132,8 +138,12 @@ public class SimpleSnakeBody implements SnakeBody {
 
     //in radians
     @Override
-    public void setHeadDirection(double direction){
-        this.direction = direction;
+    public void turn(double turnDelta) {
+        if(turnDelta > TURN_RATE)
+            turnDelta = TURN_RATE;
+        if(turnDelta < TURN_RATE * -1)
+            turnDelta = TURN_RATE * -1;
+        this.direction += turnDelta;
     }
 
     @Override
@@ -157,10 +167,19 @@ public class SimpleSnakeBody implements SnakeBody {
     }
 
     @Override
-    public double[] getBodyFoodDistribution() {
+    public double[] getBodyFoodDistribution(double minFood) {
         double amount = foodCount / bodySegments.size();
         double[] distribution = new double[bodySegments.size()];
-        Arrays.fill(distribution, amount);
+        double bucket = 0;
+        for(int i = 0; i < distribution.length - 1; i++){
+            bucket += amount;
+            if(bucket > minFood){
+                distribution[i] = bucket;
+                bucket = 0;
+            }
+        }
+        distribution[distribution.length-1] = bucket;
+
         return distribution;
     }
 

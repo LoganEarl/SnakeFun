@@ -71,7 +71,7 @@ public class Point {
         return Math.sqrt(Math.pow(destination.y - y,2) + Math.pow(destination.x - x, 2));
     }
 
-    public boolean containedBy(Point ur, Point ll){
+    public boolean containedBy(Point ll, Point ur){
         return x <= ur.getX() &&
                 x >= ll.getX() &&
                 y <= ur.getY() &&

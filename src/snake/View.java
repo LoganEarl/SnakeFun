@@ -1,6 +1,7 @@
 package snake;
 
 import processing.core.PApplet;
+import processing.core.PFont;
 import utils.MutableDouble;
 import utils.Point;
 import utils.Utils;
@@ -17,12 +18,13 @@ public class View {
         double upperY = position.getY() + radius;
         double lowerY = position.getY() - radius;
 
-        applet.noStroke();
+        //applet.noStroke();
 
         if(Utils.linearContains(upperX, lowerX, ur.getX(), ll.getX()) &&
                 Utils.linearContains(upperY, lowerY, ur.getY(), ll.getY())){
             Point relativePosition = position.sub(ll);
             applet.fill(rgb.getRed(),rgb.getGreen(), rgb.getBlue());
+            if(radius < 0.1) radius = 0.1;
             applet.ellipse(
                     (float)(relativePosition.getX() * scale.getX() + bias.getX()),
                     (float)(relativePosition.getY() * scale.getY() + bias.getY()),
@@ -39,7 +41,7 @@ public class View {
         double upperY = position.getY() + radius;
         double lowerY = position.getY() - radius;
 
-        applet.noStroke();
+        //applet.noStroke();
 
         //if we are visible on the screen
         if(Utils.linearContains(upperX, lowerX, ur.getX(), ll.getX()) &&
@@ -62,6 +64,20 @@ public class View {
             applet.stroke(0);
         for(int i = snake.getSegments().size()-1; i >= 0; i--)
             drawSegment(bodySegments.get(i), applet, ll, ur, scale, bias, snake.getColor());
+    }
+
+    public static void drawFPS(PApplet applet, PFont font){
+        applet.textFont(font,36);
+        applet.fill(255);
+        applet.text(applet.frameRate,20,20);
+        applet.fill(200);
+        applet.text((int)(applet.frameRate),20,60);
+    }
+
+    public static void drawGeneration(PApplet applet, PFont font, int generation){
+        applet.textFont(font,36);
+        applet.fill(255);
+        applet.text("Gen:" + generation,20,80);
     }
 
     public static void drawGrid(PApplet applet, Point ll, Point ur, Point scale, Point bias){

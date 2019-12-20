@@ -12,16 +12,17 @@ public interface SnakeBody {
     double getSpeed();
     double getHeadDirection();
     Color getColor();
+    double getSegmentSpacing();
     double getFood();
     void addFood(double food);
-    void setHeadDirection(double direction);
+    void turn(double turnDelta);
     void simulationTick();
     boolean headCollidingWith(Point point, double radius);
     boolean bodyCollidingWith(Point point, double radius);
     void kill();
     boolean isDead();
     //basically, distribute food along each body segment. Used if the snake dies
-    double[] getBodyFoodDistribution();
+    double[] getBodyFoodDistribution(double minFood);
     boolean isBoosting();
     void setBoosting(boolean boosting);
 }
