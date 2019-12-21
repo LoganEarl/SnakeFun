@@ -31,14 +31,22 @@ public class SimpleSnakeBody implements SnakeBody {
     private Color color;
 
     public SimpleSnakeBody(int numSegments, Point startPosition, Color color){
-        segmentRadius = new MutableDouble(1);
-        foodCount = (numSegments - 1)/BODY_LENGTH_COEFFICIENT + 1/BODY_LENGTH_COEFFICIENT - 0.00001;
-        bodySegments = new ArrayList<>();
-        bodySegments.add(new Segment(startPosition, segmentRadius, 0));
+        double food = (numSegments - 1)/BODY_LENGTH_COEFFICIENT + 1/BODY_LENGTH_COEFFICIENT - 0.00001;
 
-        calculateBody();
+        resurrect(startPosition, food);
 
         this.color = color;
+    }
+
+    @Override
+    public void resurrect(Point position, double  startingFood) {
+        segmentRadius = new MutableDouble(1);
+        foodCount = startingFood;
+        bodySegments = new ArrayList<>();
+        bodySegments.add(new Segment(position, segmentRadius, 0));
+        dead = false;
+
+        calculateBody();
     }
 
     private void calculateBody(){
@@ -69,11 +77,11 @@ public class SimpleSnakeBody implements SnakeBody {
 
     @Override
     public boolean bodyCollidingWith(Point point, double radius) {
+        double size = segmentRadius.get();
         //no need to check each segment if we are too far away to possibly be colliding
-        if(bodySegments.size() * segmentRadius.get() * BODY_SPACING_COEFFICIENT > radius + point.distanceTo(bodySegments.get(0).getPosition())){
-            double size = segmentRadius.get();
+        if(bodySegments.size() * size * BODY_SPACING_COEFFICIENT * 2 > radius + point.distanceTo(bodySegments.get(0).getPosition())){
             for(Segment segment: bodySegments)
-                if(segment.getPosition().distanceTo(point) <= size + radius)
+                if(segment.getPosition().distanceTo(point) < size + radius)
                     return true;
         }
         return false;
@@ -144,6 +152,9 @@ public class SimpleSnakeBody implements SnakeBody {
         if(turnDelta < TURN_RATE * -1)
             turnDelta = TURN_RATE * -1;
         this.direction += turnDelta;
+
+        while(direction < Math.PI) direction += 2 * Math.PI;
+        while(direction > Math.PI) direction -= 2 * Math.PI;
     }
 
     @Override
@@ -158,7 +169,8 @@ public class SimpleSnakeBody implements SnakeBody {
 
     @Override
     public void addFood(double food) {
-        foodCount += food;
+        if(foodCount + food > BODY_LENGTH_COEFFICIENT * 3)
+            foodCount += food;
     }
 
     @Override
@@ -190,6 +202,9 @@ public class SimpleSnakeBody implements SnakeBody {
 
     @Override
     public void setBoosting(boolean boosting) {
-        this.boosting = boosting;
+        if(this.getFood() > BODY_LENGTH_COEFFICIENT * 3)
+            this.boosting = boosting;
+        else
+            this.boosting = false;
     }
 }

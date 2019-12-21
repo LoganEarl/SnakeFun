@@ -64,7 +64,7 @@ public class Point {
     }
 
     public double angleTo(Point destination){
-        return Math.atan2(destination.y-y, destination.x - x);
+        return Math.atan2(destination.y - y, destination.x - x);
     }
 
     public double distanceTo(Point destination){
@@ -90,5 +90,13 @@ public class Point {
     @Override
     public int hashCode() {
         return Objects.hash(x, y);
+    }
+
+    @Override
+    public String toString() {
+        return "Point{" +
+                "x=" + x +
+                ", y=" + y +
+                '}';
     }
 }

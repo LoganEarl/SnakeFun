@@ -61,4 +61,9 @@ public class PlayerAgent implements SnakeAgent {
 
         return directionChange;
     }
+
+    @Override
+    public double getScore() {
+        return 0;
+    }
 }

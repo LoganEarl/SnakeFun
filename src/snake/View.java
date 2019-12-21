@@ -67,17 +67,21 @@ public class View {
     }
 
     public static void drawFPS(PApplet applet, PFont font){
-        applet.textFont(font,36);
+        applet.textFont(font,22);
         applet.fill(255);
-        applet.text(applet.frameRate,20,20);
-        applet.fill(200);
-        applet.text((int)(applet.frameRate),20,60);
+        applet.text("Fps:" + String.valueOf(applet.frameRate).trim(),10,20);
     }
 
     public static void drawGeneration(PApplet applet, PFont font, int generation){
-        applet.textFont(font,36);
+        applet.textFont(font,22);
         applet.fill(255);
-        applet.text("Gen:" + generation,20,80);
+        applet.text("Gen:" + generation,10,40);
+    }
+
+    public static void drawTickNum(PApplet applet, PFont font, int tickNum){
+        applet.textFont(font,22);
+        applet.fill(255);
+        applet.text("Tick:" + tickNum,10,60);
     }
 
     public static void drawGrid(PApplet applet, Point ll, Point ur, Point scale, Point bias){

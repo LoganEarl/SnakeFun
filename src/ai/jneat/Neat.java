@@ -242,14 +242,14 @@ public class Neat {
         p_trait_mutation_power = 1.0;
         p_linktrait_mut_sig = 1.0;
         p_nodetrait_mut_sig = 0.5;
-        p_recur_prob = 0.1;
-        p_weight_mut_power = 2.5;
+        p_recur_prob = 0.05;
+        p_weight_mut_power = 1.5;
         p_disjoint_coeff = 1.0;
         p_excess_coeff = 1.0;
         p_mutdiff_coeff = 0.4;
         p_compat_threshold = 3.0;
         p_age_significance = 1.0;
-        p_survival_thresh = 0.2;
+        p_survival_thresh = 0.25;
         p_mutate_only_prob = .25;
         p_mutate_random_trait_prob = 0.1;
         p_mutate_link_trait_prob = 0.1;
@@ -258,7 +258,7 @@ public class Neat {
         p_mutate_toggle_enable_prob = 0;
         p_mutate_gene_reenable_prob = 0;
         p_mutate_add_node_prob = 0.03;
-        p_mutate_add_sensor = 0.1;		//TODO I added this, make sure to tune it
+        p_mutate_add_sensor = 0.05;		//TODO I added this, make sure to tune it
         p_mutate_add_link_prob = 0.08;
         p_interspecies_mate_rate = 0;
         p_mate_multipoint_prob = 0.3;

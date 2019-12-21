@@ -25,4 +25,5 @@ public interface SnakeBody {
     double[] getBodyFoodDistribution(double minFood);
     boolean isBoosting();
     void setBoosting(boolean boosting);
+    void resurrect(Point position, double startingFood);
 }

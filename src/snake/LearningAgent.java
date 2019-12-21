@@ -9,6 +9,8 @@ public class LearningAgent implements SnakeAgent {
     private SnakeBody snake;
     private boolean boundSnake = false;
 
+    private double maxScore = 0;
+
     public LearningAgent(Organism organism){
         this.neuroOrganism = organism;
     }
@@ -44,10 +46,10 @@ public class LearningAgent implements SnakeAgent {
     @Override
     public void takeActions() {
         Network brain = neuroOrganism.getNet();
-        double directionChange = ((NNode)brain.getOutputs().elementAt(0)).getActivation();
-        directionChange *= 2;
-        directionChange -= 1;
-        double boostConfidence = ((NNode)brain.getOutputs().elementAt(1)).getActivation();
+        double negativeTurnConfidence = ((NNode)brain.getOutputs().elementAt(0)).getActivation();
+        double positiveTurnConfidence = ((NNode)brain.getOutputs().elementAt(1)).getActivation();
+        double directionChange = positiveTurnConfidence - negativeTurnConfidence;
+        double boostConfidence = ((NNode)brain.getOutputs().elementAt(2)).getActivation();
 
         snake.turn(directionChange);
         snake.setBoosting(boostConfidence > 0.5);
@@ -61,6 +63,14 @@ public class LearningAgent implements SnakeAgent {
 
     @Override
     public void setScore(double score) {
-        neuroOrganism.setFitness(score);
+        if(score > maxScore) {
+            maxScore = score;
+            neuroOrganism.setFitness(maxScore);
+        }
+    }
+
+    @Override
+    public double getScore() {
+        return maxScore;
     }
 }

@@ -21,14 +21,15 @@ public class WorldWindow extends PApplet {
 
     private List<LearningAgent> learningAgents;
     private Population population;
-    private int generation = 0;
+    private int generation = -1;
 
     private Point focusPoint = new Point(15, 10);
     private float focusHeight = 20;
     private float focusWidth = 40;
     private int scrollDirection = -1;
     private static final double SENSOR_DISTANCE = 10;
-    private static final boolean ALLOW_PLAYER = false;
+    private static final int POPULATION_SIZE = 0;
+    private static final boolean ALLOW_PLAYER = true;
     private boolean fastForward = false;
 
     private WorldModel model;
@@ -36,31 +37,13 @@ public class WorldWindow extends PApplet {
     private PFont font;
 
     public WorldWindow() {
-        model = new WorldModel(
-                ALLOW_PLAYER ? 31 : 30,
-                new Point(100, 100),
-                2,
-                0.1, 0.3);
-
-        if (ALLOW_PLAYER)
-            playerAgent = new PlayerAgent();
-
         Neat.initbase();
-        population = new Population(30, 19, 2, 5, true, 0.5);
+
+        population = new Population(POPULATION_SIZE, SnakeAgent.NUM_INPUTS, SnakeAgent.NUM_OUTPUTS, 1, true, 0.1);
 
         learningAgents = new ArrayList<>(60);
-        for (Object o : population.getOrganisms()) {
-            Organism organism = (Organism) o;   //Not even any generics. ugh
-            learningAgents.add(new LearningAgent(organism));
-        }
 
-        List<SnakeBody> snakes = List.copyOf(model.getAllSnakes());
-        for (int i = 0; i < learningAgents.size(); i++) {
-            learningAgents.get(i).bindSnake(snakes.get(i));
-        }
-
-        if (ALLOW_PLAYER)
-            playerAgent.bindSnake(snakes.get(snakes.size() - 1));
+        markEpoch();
     }
 
     public void settings() {
@@ -95,8 +78,11 @@ public class WorldWindow extends PApplet {
 
         background(64);
 
-        if(!fastForward) {
+        if (!fastForward) {
             float minFocus = Math.min(focusWidth, focusHeight);
+
+            scale(1, -1,1);
+            translate(0, -height, 0);
 
             @SuppressWarnings("ConstantConditions")
             Point scale = new Point(Math.min(SCREEN_WIDTH, SCREEN_HEIGHT) / (minFocus * 2), Math.min(SCREEN_WIDTH, SCREEN_HEIGHT) / (minFocus * 2));
@@ -109,6 +95,9 @@ public class WorldWindow extends PApplet {
                 worldMouse = worldMouse.sub(bias);
                 worldMouse = worldMouse.div(scale);
                 worldMouse = worldMouse.add(ll);
+                Point playerPos = playerAgent.getBoundSnake().getHead().getPosition();
+                double yDist = worldMouse.getY() - playerPos.getY();
+                worldMouse = new Point(worldMouse.getX(), worldMouse.getY() - 2 * yDist);
                 playerAgent.loadInputs(new double[]{worldMouse.getX(), worldMouse.getY(), mouseDown ? 1 : 0});
                 playerAgent.takeActions();
                 focusPoint.set(playerAgent.getBoundSnake().getHead().getPosition());
@@ -128,43 +117,61 @@ public class WorldWindow extends PApplet {
             agent.loadInputs(NeuralInterface.generateInputs(agent.getBoundSnake(), SENSOR_DISTANCE, model));
             agent.processInputs();
             agent.takeActions();
+            agent.setScore(agent.getBoundSnake().getFood());
         }
 
+        model.addToBucket(0.01);
+        model.resurrectDeadSnakes();
         model.tick();
         model.doSnakeCollisions();
         model.doFoodCollisions();
 
+        translate(0, height, 0);
+        scale(1, -1,1);
+
 
         View.drawFPS(this, font);
         View.drawGeneration(this, font, generation);
+        View.drawTickNum(this, font, model.getTickNum());
+
+        if (model.getTickNum() > 3000)
+            markEpoch();
     }
 
     private void markEpoch() {
-        for (LearningAgent agent : learningAgents) {
-            double score = agent.getBoundSnake().getFood();
-            if (agent.getBoundSnake().isDead())
-                score = score * 0.5;
+        if (generation >= 0) {
+            double avgScore = 0;
+            double maxScore = 0;
+            for (LearningAgent agent : learningAgents) {
+                double score = agent.getScore();
+                avgScore += score;
+                if(score > maxScore)
+                    maxScore = score;
+            }
+            avgScore /= learningAgents.size();
+            System.out.printf("\nGen: %d Average Score: %.2f     Max Score:%.2f\n", generation, avgScore,maxScore);
 
-            agent.setScore(score);
+            if (generation % 5 == 0)
+                population.print_to_file_by_species("data/Generation" + generation + ".txt");
+            population.epoch(generation);
         }
 
-        population.print_to_file_by_species("data/Generation:" + generation + ".txt");
-        population.epoch(generation++);
+        generation++;
 
         if (ALLOW_PLAYER)
             playerAgent = new PlayerAgent();
 
         learningAgents.clear();
         for (Object o : population.getOrganisms()) {
-            Organism organism = (Organism) o;   //fuck vectors man. This guy really didn't know java
+            Organism organism = (Organism) o;   //ugh, needs generics
             learningAgents.add(new LearningAgent(organism));
         }
 
         model = new WorldModel(
-                ALLOW_PLAYER ? 31 : 30,
+                ALLOW_PLAYER ? POPULATION_SIZE + 1 : POPULATION_SIZE,
                 new Point(100, 100),
-                2,
-                0.1, 0.3);
+                0.2,
+                0.3, 0.6);
 
         List<SnakeBody> snakes = List.copyOf(model.getAllSnakes());
         for (int i = 0; i < learningAgents.size(); i++)

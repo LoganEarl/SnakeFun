@@ -11,6 +11,7 @@ public class WorldModel {
     private Set<SnakeBody> deadSnakes = new HashSet<>();
     private Map<SnakeBody, Integer> lastBoostTimings = new HashMap<>();
     private Point size;
+    private Point ur, ll;
     private Random random = new Random(System.currentTimeMillis());
     private static final int FOOD_MAP_RESOLUTION = 16;
     private final double BOOST_FOOD_USAGE;
@@ -30,8 +31,11 @@ public class WorldModel {
         this.maxFood = maxFood;
         this.size = size;
 
+        this.ur = new Point(size.getX()/2.0, size.getY()/2.0);
+        this.ll = new Point(size.getX()/-2.0, size.getY()/-2.0);
+
         for (int i = 0; i < numSnakes; i++) {
-            livingSnakes.add(new SimpleSnakeBody(10, randomPosition(random, size),
+            livingSnakes.add(new SimpleSnakeBody(5, randomPosition(random, size),
                     Color.getHSBColor(random.nextFloat(), random.nextFloat(), random.nextFloat())));
         }
         placeInitialFood(foodDensity);
@@ -73,7 +77,7 @@ public class WorldModel {
 
     //place 10% or minFood of food, whichever is higher
     private void expendFoodBucket() {
-        if (foodBucket > minFood) {
+        if (foodBucket > 20) {
             double toPlace = foodBucket * 0.1;
             if (toPlace < minFood) toPlace = minFood;
 
@@ -90,6 +94,10 @@ public class WorldModel {
     public void doSnakeCollisions() {
         //collide players with each other
         List<SnakeBody> allSnakes = new ArrayList<>(this.livingSnakes);
+        for(SnakeBody s:allSnakes)
+            if(!s.getHead().getPosition().containedBy(ll,ur))
+                s.kill();
+
         for (int i = 0; i < allSnakes.size() - 1; i++) {
             for (int j = i + 1; j < allSnakes.size(); j++) {
                 SnakeBody s1 = allSnakes.get(i);
@@ -133,6 +141,20 @@ public class WorldModel {
             for (Food f : eatenFood) {
                 snake.addFood(f.getAmount());
                 removeFood(f);
+            }
+        }
+    }
+
+    public void resurrectDeadSnakes(){
+        if(deadSnakes.size() > 0) {
+            Iterator<SnakeBody> snakeBodyIterator = deadSnakes.iterator();
+            while (snakeBodyIterator.hasNext()  && foodBucket > 5) {
+                SnakeBody snake = snakeBodyIterator.next();
+                double foodAllocation = 5;
+                foodBucket -= 5;
+                snake.resurrect(randomPosition(random, size), foodAllocation);
+                snakeBodyIterator.remove();
+                livingSnakes.add(snake);
             }
         }
     }
@@ -237,6 +259,14 @@ public class WorldModel {
 
     public double getMaxFood() {
         return maxFood;
+    }
+
+    public int getTickNum() {
+        return tickNum;
+    }
+
+    public void addToBucket(double foodAmount){
+        foodBucket += foodAmount;
     }
 
     public Set<SnakeBody> getAllSnakes() {

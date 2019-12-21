@@ -2,6 +2,22 @@ package snake;
 
 public interface SnakeAgent {
     /*
+    NEW MODEL============================================
+    Input Mappings
+    0: -90:-20     OpponentDetector
+    1: -20:20       OpponentDetector
+    2: 20:110       OpponentDetector
+    3: -110:-20     FoodDetector
+    4: -20:20       FoodDetector
+    5: 20:90       FoodDetector
+    6: Starvation level (activation = 1/(foodLevel+1))
+
+    Output Mappings
+    0: Right Confidence
+    1: Left Confidence
+    2: Boost Confidence
+
+    OLD MODEL=============================================
     Input Mappings
     0: -180:-90 OpponentDetector
     1: -90:-60  OpponentDetector
@@ -30,12 +46,13 @@ public interface SnakeAgent {
 
 
 
-    int NUM_INPUTS = 19;
-    int NUM_OUTPUTS = 2;
+    int NUM_INPUTS = 7;
+    int NUM_OUTPUTS = 3;
     void bindSnake(SnakeBody snake);
     SnakeBody getBoundSnake();
     void loadInputs(double[] inputs);
     void processInputs();
     void takeActions();
     void setScore(double score);
+    double getScore();
 }
